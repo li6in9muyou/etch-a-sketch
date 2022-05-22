@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>etch a sketch</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      #canvas {
+        outline: solid green 4px;
+        margin: auto;
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .pixel {
+        border: solid whitesmoke 1px;
+        background-color: lightgray;
+      }
+
+      .pixel--lit {
+        background-color: black;
+      }
+    </style>
+  </head>
+  <body
+    x-data="{
+      canvas_dim:700,
+      pen_down:false,
+      pps: 8,
+      _lit: [],
+      get lit() {
+        if (_lit.length !== this.pps * this.pps) {
+          this._lit = new Array(pps * pps);
+        }
+        return this._lit;
+      },
+      clear() {
+        for (let i = 0; i < this.pps * this.pps; i++) {
+          this._lit[i] = false;
+        }
+      }
+    }"
+  >
+    <div
+      style="margin: auto; display: block; width: fit-content; padding: 2rem"
+    >
+      <label for="pixel_per_side">
+        每边
+        <span style="font-weight: bold" x-text="pps"></span>
+        个像素
+      </label>
+      <input
+        id="pixel_per_side"
+        max="80"
+        min="8"
+        step="4"
+        type="range"
+        x-model="pps"
+      />
+      <button @click="clear()">擦除</button>
+    </div>
+    <div
+      :style="{width:`${canvas_dim}px`,height:`${canvas_dim}px`}"
+      @mousedown="pen_down=true"
+      @mouseup="pen_down=false"
+      id="canvas"
+      x-cloak
+    >
+      <template x-for="idx in lit.keys">
+        <div
+          :class="lit[idx] && 'pixel--lit'"
+          :key="idx"
+          :style="{width:`${canvas_dim/pps}px`,height:`${canvas_dim/pps}px`}"
+          @mouseenter="lit[idx]=pen_down ^ lit[idx]"
+          class="pixel"
+        ></div>
+      </template>
+    </div>
+  </body>
+  <script defer src="https://unpkg.com/alpinejs"></script>
+</html>
