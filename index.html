@@ -11,6 +11,8 @@
       }
 
       #canvas {
+        width: 500px;
+        height: 500px;
         outline: solid green 4px;
         margin: auto;
         display: flex;
@@ -37,8 +39,71 @@
         个像素
       </label>
       <input id="pixel_per_side" max="80" min="8" step="4" type="range" />
-      <button>擦除</button>
+      <button id="clear">擦除</button>
     </div>
     <div id="canvas"></div>
   </body>
+  <script>
+    const CANVAS_SIZE = 500;
+    const CANVAS = document.querySelector("#canvas");
+    CANVAS.addEventListener("mouseleave", () => (_pen_down = false));
+    const PPS_VIEW = document.querySelector("#pps_view");
+    const PPS_INPUT = document.querySelector("#pixel_per_side");
+    PPS_INPUT.addEventListener("change", (e) => setPPS(e.target.value));
+    const CLEAR_INPUT = document.querySelector("#clear");
+    CLEAR_INPUT.addEventListener("click", () => setCanvas(pixels(pps)));
+
+    let pps = 8;
+    let pixels = (pps) => new Array(pps * pps).fill(false);
+    let _pen_down = false;
+    let pen_down = () => _pen_down;
+
+    function setPPS(p) {
+      pps = p;
+      PPS_VIEW.innerHTML = pps.toString();
+      setCanvas(pixels(pps));
+    }
+
+    function setCanvas(pixels) {
+      const nodes = [];
+      for (let i = 0; i < pixels.length; i++) {
+        const d = document.createElement("div");
+        d.id = i;
+        d.classList.add("pixel");
+        d.style.width = `${CANVAS_SIZE / pps}px`;
+        d.style.height = `${CANVAS_SIZE / pps}px`;
+
+        d.addEventListener("contextmenu", (e) => e.preventDefault());
+        d.addEventListener(
+          "mousedown",
+          (e) =>
+            e.button === 0 &&
+            (_pen_down = true) &&
+            d.classList.add("pixel--lit")
+        );
+        d.addEventListener(
+          "mouseup",
+          () => (_pen_down = false) && d.classList.add("pixel--lit")
+        );
+        d.addEventListener(
+          "mouseenter",
+          () => pen_down() && d.classList.add("pixel--lit")
+        );
+        d.addEventListener("dragstart", (e) => e.preventDefault());
+
+        nodes.push(d);
+      }
+      CANVAS.innerHTML = "";
+      CANVAS.append(...nodes);
+    }
+
+    function litPixel(id) {
+      document.querySelector(id.toString()).classList.add("pixel--lit");
+    }
+
+    window.addEventListener("load", () => {
+      PPS_INPUT.value = pps;
+      setPPS(pps);
+    });
+  </script>
 </html>
