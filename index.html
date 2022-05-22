@@ -30,9 +30,10 @@
     </style>
   </head>
   <body>
-    <h1 style="text-align: center; font-size: 48px; padding-top: 1rem">
-      Etch a Sketch
-    </h1>
+    <div style="text-align: center; padding-top: 1rem">
+      <h1 style="font-size: 64px">Etch a Sketch</h1>
+      <p style="font-size: 24px">left click to draw, right click to erase.</p>
+    </div>
     <div
       style="
         margin: auto;
@@ -82,21 +83,26 @@
         d.style.height = `${CANVAS_SIZE / pps}px`;
 
         d.addEventListener("contextmenu", (e) => e.preventDefault());
-        d.addEventListener(
-          "mousedown",
-          (e) =>
-            e.button === 0 &&
-            (_pen_down = true) &&
-            d.classList.add("pixel--lit")
-        );
+        d.addEventListener("mousedown", (e) => {
+          if (e.button === 0) {
+            _pen_down = true;
+            d.classList.add("pixel--lit");
+          } else if (e.button === 2) {
+            d.classList.remove("pixel--lit");
+          }
+        });
         d.addEventListener(
           "mouseup",
           () => (_pen_down = false) && d.classList.add("pixel--lit")
         );
-        d.addEventListener(
-          "mouseenter",
-          () => pen_down() && d.classList.add("pixel--lit")
-        );
+        d.addEventListener("mouseenter", (e) => {
+          if (e.buttons === 2) {
+            return d.classList.remove("pixel--lit");
+          }
+          if (pen_down()) {
+            return d.classList.add("pixel--lit");
+          }
+        });
         d.addEventListener("dragstart", (e) => e.preventDefault());
 
         nodes.push(d);
