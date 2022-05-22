@@ -27,60 +27,18 @@
       }
     </style>
   </head>
-  <body
-    x-data="{
-      canvas_dim:700,
-      pen_down:false,
-      pps: 8,
-      _lit: [],
-      get lit() {
-        if (_lit.length !== this.pps * this.pps) {
-          this._lit = new Array(pps * pps);
-        }
-        return this._lit;
-      },
-      clear() {
-        for (let i = 0; i < this.pps * this.pps; i++) {
-          this._lit[i] = false;
-        }
-      }
-    }"
-  >
+  <body>
     <div
       style="margin: auto; display: block; width: fit-content; padding: 2rem"
     >
       <label for="pixel_per_side">
         每边
-        <span style="font-weight: bold" x-text="pps"></span>
+        <span id="pps_view"></span>
         个像素
       </label>
-      <input
-        id="pixel_per_side"
-        max="80"
-        min="8"
-        step="4"
-        type="range"
-        x-model="pps"
-      />
-      <button @click="clear()">擦除</button>
+      <input id="pixel_per_side" max="80" min="8" step="4" type="range" />
+      <button>擦除</button>
     </div>
-    <div
-      :style="{width:`${canvas_dim}px`,height:`${canvas_dim}px`}"
-      @mousedown="pen_down=true"
-      @mouseup="pen_down=false"
-      id="canvas"
-      x-cloak
-    >
-      <template x-for="idx in lit.keys">
-        <div
-          :class="lit[idx] && 'pixel--lit'"
-          :key="idx"
-          :style="{width:`${canvas_dim/pps}px`,height:`${canvas_dim/pps}px`}"
-          @mouseenter="lit[idx]=pen_down ^ lit[idx]"
-          class="pixel"
-        ></div>
-      </template>
-    </div>
+    <div id="canvas"></div>
   </body>
-  <script defer src="https://unpkg.com/alpinejs"></script>
 </html>
