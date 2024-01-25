@@ -61,15 +61,16 @@
   const CLEAR_INPUT = document.querySelector("#clear");
   CLEAR_INPUT.addEventListener("click", () => setCanvas(pixels(pps)));
 
-  let pps = 8;
+  let state = {
+    pps: 8,
+    pen_down: false,
+  };
   let pixels = (pps) => new Array(pps * pps).fill(false);
-  let _pen_down = false;
-  let pen_down = () => _pen_down;
 
   function setPPS(p) {
-    pps = p;
-    PPS_VIEW.innerHTML = pps.toString();
-    setCanvas(pixels(pps));
+    state = { ...state, pps: p };
+    PPS_VIEW.innerHTML = state.pps.toString();
+    setCanvas(pixels(state.pps));
   }
 
   function setCanvas(pixels) {
@@ -78,8 +79,8 @@
       const d = document.createElement("div");
       d.id = i.toString();
       d.classList.add("pixel");
-      d.style.width = `${CANVAS_SIZE / pps}px`;
-      d.style.height = `${CANVAS_SIZE / pps}px`;
+      d.style.width = `${CANVAS_SIZE / state.pps}px`;
+      d.style.height = `${CANVAS_SIZE / state.pps}px`;
 
       d.addEventListener("contextmenu", (e) => e.preventDefault());
       d.addEventListener("dragstart", (e) => e.preventDefault());
@@ -95,17 +96,17 @@
   }
 
   window.addEventListener("load", () => {
-    PPS_INPUT.value = pps;
-    setPPS(pps);
+    PPS_INPUT.value = state.pps;
+    setPPS(state.pps);
     document.addEventListener("mousedown", (e) => {
       if (e.button === 0) {
-        _pen_down = true;
+        state = { ...state, pen_down: true };
       }
     });
-    document.addEventListener("mouseup", () => _pen_down = false);
+    document.addEventListener("mouseup", () => state = { ...state, pen_down: false });
     document.addEventListener("mousemove", (e) => {
       const elem = e.target;
-      if (elem.tagName === "DIV" && pen_down() && elem.classList.contains("pixel")) {
+      if (elem.tagName === "DIV" && state.pen_down && elem.classList.contains("pixel")) {
         elem.classList.add("pixel--lit");
       }
     }, { passive: true });
