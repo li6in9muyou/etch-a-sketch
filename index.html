@@ -55,7 +55,6 @@
 <script>
   const CANVAS_SIZE = 500;
   const CANVAS = document.querySelector("#canvas");
-  CANVAS.addEventListener("mouseleave", () => (_pen_down = false));
   const PPS_VIEW = document.querySelector("#pps_view");
   const PPS_INPUT = document.querySelector("#pixel_per_side");
   PPS_INPUT.addEventListener("change", (e) => setPPS(e.target.value));
@@ -83,26 +82,6 @@
       d.style.height = `${CANVAS_SIZE / pps}px`;
 
       d.addEventListener("contextmenu", (e) => e.preventDefault());
-      d.addEventListener("mousedown", (e) => {
-        if (e.button === 0) {
-          _pen_down = true;
-          d.classList.add("pixel--lit");
-        } else if (e.button === 2) {
-          d.classList.remove("pixel--lit");
-        }
-      });
-      d.addEventListener(
-        "mouseup",
-        () => (_pen_down = false) && d.classList.add("pixel--lit")
-      );
-      d.addEventListener("mouseenter", (e) => {
-        if (e.buttons === 2) {
-          return d.classList.remove("pixel--lit");
-        }
-        if (pen_down()) {
-          return d.classList.add("pixel--lit");
-        }
-      });
       d.addEventListener("dragstart", (e) => e.preventDefault());
 
       nodes.push(d);
@@ -118,6 +97,18 @@
   window.addEventListener("load", () => {
     PPS_INPUT.value = pps;
     setPPS(pps);
+    document.addEventListener("mousedown", (e) => {
+      if (e.button === 0) {
+        _pen_down = true;
+      }
+    });
+    document.addEventListener("mouseup", () => _pen_down = false);
+    document.addEventListener("mousemove", (e) => {
+      const elem = e.target;
+      if (elem.tagName === "DIV" && pen_down() && elem.classList.contains("pixel")) {
+        elem.classList.add("pixel--lit");
+      }
+    }, { passive: true });
   });
 </script>
 </html>
