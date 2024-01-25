@@ -10,6 +10,14 @@
       box-sizing: border-box;
     }
 
+    #controls {
+      margin: auto;
+      width: fit-content;
+      padding: 2rem;
+      display: flex;
+      column-gap: 0.8rem;
+    }
+
     #canvas {
       width: 500px;
       height: 500px;
@@ -30,27 +38,19 @@
   </style>
 </head>
 <body>
-  <div style="text-align: center; padding-top: 1rem">
+  <section style="text-align: center; padding-top: 1rem">
     <h1 style="font-size: 64px">Etch a Sketch</h1>
     <p style="font-size: 24px">left click to draw, right click to erase.</p>
-  </div>
-  <div
-    style="
-        margin: auto;
-        width: fit-content;
-        padding: 2rem;
-        display: flex;
-        column-gap: 0.8rem;
-      "
-  >
+  </section>
+  <section id="controls">
     <label for="pixel_per_side">
       <span id="pps_view"></span>
       pixels per side
     </label>
     <input id="pixel_per_side" max="80" min="8" step="4" type="range"/>
     <button id="clear" style="padding: 0.2rem 1rem">clear</button>
-  </div>
-  <div id="canvas"></div>
+  </section>
+  <main id="canvas"></main>
 </body>
 <script>
   const CANVAS_SIZE = 500;
