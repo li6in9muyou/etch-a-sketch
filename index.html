@@ -99,15 +99,32 @@
     PPS_INPUT.value = state.pps;
     setPPS(state.pps);
     document.addEventListener("mousedown", (e) => {
-      if (e.button === 0) {
-        state = { ...state, pen_down: true };
+      switch (e.button) {
+        case 0:
+          state = { ...state, pen_down: true };
+          break;
+        case 2:
+          state = { ...state, eraser_down: true };
+          break;
       }
     });
-    document.addEventListener("mouseup", () => state = { ...state, pen_down: false });
+    document.addEventListener("mouseup", (e) => {
+      switch (e.button) {
+        case 0:
+          state = { ...state, pen_down: false };
+          break;
+        case 2:
+          state = { ...state, eraser_down: false };
+          break;
+      }
+    });
     document.addEventListener("mousemove", (e) => {
       const elem = e.target;
       if (elem.tagName === "DIV" && state.pen_down && elem.classList.contains("pixel")) {
         elem.classList.add("pixel--lit");
+      }
+      if (elem.tagName === "DIV" && state.eraser_down && elem.classList.contains("pixel--lit")) {
+        elem.classList.remove("pixel--lit");
       }
     }, { passive: true });
   });
