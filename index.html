@@ -59,7 +59,7 @@
   const PPS_INPUT = document.querySelector("#pixel_per_side");
   PPS_INPUT.addEventListener("change", (e) => setPPS(e.target.value));
   const CLEAR_INPUT = document.querySelector("#clear");
-  CLEAR_INPUT.addEventListener("click", () => setCanvas(pixels(pps)));
+  CLEAR_INPUT.addEventListener("click", () => setCanvas(pixels(state.pps)));
 
   let state = {
     pps: 8,
