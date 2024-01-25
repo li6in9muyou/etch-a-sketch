@@ -55,6 +55,22 @@
   <main id="canvas"></main>
 </body>
 <script>
+  function IdleTask(taskFn, options = {}) {
+    this.options = { idleTimeout: 500, taskInterval: 800, ...options };
+    this.intervalHandle = null;
+    this.idleTimer = null;
+    this.wait = function () {
+      clearInterval(this.intervalHandle);
+      clearTimeout(this.idleTimer);
+      this.idleTimer = setTimeout(() => {
+        taskFn();
+        this.intervalHandle = setInterval(taskFn, this.options.taskInterval);
+      }, this.options.idleTimeout);
+    };
+    this.wait();
+  }
+</script>
+<script>
   const CANVAS_SIZE = 500;
   const CANVAS = document.querySelector("#canvas");
   const PPS_VIEW = document.querySelector("#pps_view");
@@ -62,10 +78,12 @@
   PPS_INPUT.addEventListener("change", (e) => setPPS(e.target.value));
   const CLEAR_INPUT = document.querySelector("#clear");
   CLEAR_INPUT.addEventListener("click", () => setCanvas(pixels(state.pps)));
+  const reset_prev_lit_pixel = new IdleTask(() => state = { ...state, prev_lit_pixel: null }, { taskInterval: 1e9 });
 
   let state = {
     pps: 8,
     pen_down: false,
+    prev_lit_pixel: null,
   };
   let pixels = (pps) => new Array(pps * pps).fill(false);
 
@@ -124,6 +142,18 @@
       const elem = e.target;
       if (elem.tagName === "DIV" && state.pen_down && elem.classList.contains("pixel")) {
         elem.classList.add("pixel--lit");
+        reset_prev_lit_pixel.wait();
+        const plp = state.prev_lit_pixel;
+        if (plp !== null && plp !== elem) {
+          const prevX = plp.offsetLeft + plp.offsetWidth / 2;
+          const prevY = plp.offsetTop + plp.offsetHeight / 2;
+          const x = elem.offsetLeft + elem.offsetWidth / 2;
+          const y = elem.offsetTop + elem.offsetHeight / 2;
+          const distSqr = (x - prevX) * (x - prevX) + (y - prevY) * (y - prevY);
+          const too_far_apart = distSqr > 2 * elem.offsetWidth * elem.offsetWidth;
+          console.log("two lit pixels too far?", distSqr, too_far_apart);
+        }
+        state = { ...state, prev_lit_pixel: elem };
       }
       if (elem.tagName === "DIV" && state.eraser_down && elem.classList.contains("pixel--lit")) {
         elem.classList.remove("pixel--lit");
