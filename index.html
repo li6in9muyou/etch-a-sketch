@@ -168,7 +168,7 @@
           const y = +elem.dataset.y;
           const close_enough = Math.abs(x - prevX) <= 1 && Math.abs(y - prevY) <= 1;
           if (!close_enough) {
-            interpolateLine(+plp.dataset.x, +plp.dataset.y, +elem.dataset.x, +elem.dataset.y).forEach(([x, y]) => {
+            interpolateLine(prevX, prevY, x, y).forEach(([x, y]) => {
               document.querySelector(`[data-x="${x}"][data-y="${y}"]`).classList.add("pixel--lit");
             });
           }
