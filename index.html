@@ -115,6 +115,17 @@
     document.querySelector(id.toString()).classList.add("pixel--lit");
   }
 
+  function handleMouseUp(e) {
+    switch (e.button) {
+      case 0:
+        state = { ...state, pen_down: false };
+        break;
+      case 2:
+        state = { ...state, eraser_down: false };
+        break;
+    }
+  }
+
   PPS_INPUT.value = state.pps;
   setPPS(state.pps);
   document.addEventListener("mousedown", (e) => {
@@ -127,16 +138,9 @@
         break;
     }
   });
-  document.addEventListener("mouseup", (e) => {
-    switch (e.button) {
-      case 0:
-        state = { ...state, pen_down: false };
-        break;
-      case 2:
-        state = { ...state, eraser_down: false };
-        break;
-    }
-  });
+  document.addEventListener("mouseleave", handleMouseUp);
+  document.addEventListener("mouseout", handleMouseUp);
+  document.addEventListener("mouseup", handleMouseUp);
   document.addEventListener("mousemove", (e) => {
     const elem = e.target;
     if (elem.tagName === "DIV" && state.pen_down && elem.classList.contains("pixel")) {
