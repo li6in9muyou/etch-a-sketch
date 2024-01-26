@@ -137,26 +137,55 @@
   });
   document.addEventListener("mouseleave", handleMouseUp);
   document.addEventListener("mouseup", handleMouseUp);
-  document.addEventListener("mousemove", (e) => {
-    const elem = e.target;
-    if (elem.tagName === "DIV" && state.pen_down && elem.classList.contains("pixel")) {
-      elem.classList.add("pixel--lit");
-      reset_prev_lit_pixel.wait();
-      const plp = state.prev_lit_pixel;
-      if (plp !== null && plp !== elem) {
-        const prevX = plp.offsetLeft + plp.offsetWidth / 2;
-        const prevY = plp.offsetTop + plp.offsetHeight / 2;
-        const x = elem.offsetLeft + elem.offsetWidth / 2;
-        const y = elem.offsetTop + elem.offsetHeight / 2;
-        const distSqr = (x - prevX) * (x - prevX) + (y - prevY) * (y - prevY);
-        const too_far_apart = distSqr > 2 * elem.offsetWidth * elem.offsetWidth;
-        console.log("two lit pixels too far?", distSqr, too_far_apart);
+
+  function interpolateLine(x1, y1, x2, y2) {
+    function interpolate(from, to, cnt) {
+      const step = (to - from) / (cnt + 1);
+      return new Array(cnt).fill(null).map((_, idx) => from + (idx + 1) * step);
+    }
+
+    const cnt = Math.max(y2 - y1, x2 - x1) - 1;
+    const xItp = interpolate(x1, x2, cnt).map(Math.round);
+    const yItp = interpolate(y1, y2, cnt).map(Math.round);
+    return xItp.reduce((points, x, idx) => {
+      points.push([x, yItp[idx]]);
+      return points;
+    }, []);
+  }
+
+  function attemptToLitPixel(predicateLit, predicateUnlit) {
+    console.assert(predicateLit && predicateUnlit, "attemptToLitPixel must accept two predicates");
+    return e => {
+      const elem = e.target;
+      if (predicateLit(elem)) {
+        elem.classList.add("pixel--lit");
+        reset_prev_lit_pixel.wait();
+        const plp = state.prev_lit_pixel;
+        if (plp !== null && plp !== elem) {
+          const prevX = +plp.dataset.x;
+          const prevY = +plp.dataset.y;
+          const x = +elem.dataset.x;
+          const y = +elem.dataset.y;
+          const close_enough = Math.abs(x - prevX) <= 1 && Math.abs(y - prevY) <= 1;
+          if (!close_enough) {
+            interpolateLine(+plp.dataset.x, +plp.dataset.y, +elem.dataset.x, +elem.dataset.y).forEach(([x, y]) => {
+              document.querySelector(`[data-x="${x}"][data-y="${y}"]`).classList.add("pixel--lit");
+            });
+          }
+        }
+        state = { ...state, prev_lit_pixel: elem };
       }
-      state = { ...state, prev_lit_pixel: elem };
-    }
-    if (elem.tagName === "DIV" && state.eraser_down && elem.classList.contains("pixel--lit")) {
-      elem.classList.remove("pixel--lit");
-    }
-  }, { passive: true });
+      if (predicateUnlit(elem)) {
+        elem.classList.remove("pixel--lit");
+      }
+    };
+  }
+
+  CANVAS.addEventListener("click", attemptToLitPixel(e => e.tagName === "DIV" && e.classList.contains("pixel"), () => false));
+  document.addEventListener("mousemove",
+    attemptToLitPixel(
+      e => e.tagName === "DIV" && state.pen_down && e.classList.contains("pixel"),
+      e => e.tagName === "DIV" && state.eraser_down && e.classList.contains("pixel--lit")),
+    { passive: true });
 </script>
 </html>
