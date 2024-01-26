@@ -77,7 +77,7 @@
   const PPS_INPUT = document.querySelector("#pixel_per_side");
   PPS_INPUT.addEventListener("change", (e) => setPPS(e.target.value));
   const CLEAR_INPUT = document.querySelector("#clear");
-  CLEAR_INPUT.addEventListener("click", () => setCanvas(pixels(state.pps)));
+  CLEAR_INPUT.addEventListener("click", () => setCanvas(pixelCnt(state.pps)));
   const reset_prev_lit_pixel = new IdleTask(() => state = { ...state, prev_lit_pixel: null }, { taskInterval: 1e9 });
 
   let state = {
@@ -85,19 +85,20 @@
     pen_down: false,
     prev_lit_pixel: null,
   };
-  let pixels = (pps) => new Array(pps * pps).fill(false);
+  const pixelCnt = pps => pps * pps;
 
   function setPPS(p) {
     state = { ...state, pps: p };
     PPS_VIEW.innerHTML = state.pps.toString();
-    setCanvas(pixels(state.pps));
+    setCanvas(pixelCnt(state.pps));
   }
 
   function setCanvas(pixels) {
     const nodes = [];
-    for (let i = 0; i < pixels.length; i++) {
+    for (let i = 0; i < pixels; i++) {
       const d = document.createElement("div");
-      d.id = i.toString();
+      d.dataset.x = (i % state.pps).toString();
+      d.dataset.y = Math.floor(i / state.pps).toString();
       d.classList.add("pixel");
       d.style.width = `${CANVAS_SIZE / state.pps}px`;
       d.style.height = `${CANVAS_SIZE / state.pps}px`;
@@ -109,10 +110,6 @@
     }
     CANVAS.innerHTML = "";
     CANVAS.append(...nodes);
-  }
-
-  function litPixel(id) {
-    document.querySelector(id.toString()).classList.add("pixel--lit");
   }
 
   function handleMouseUp(e) {
