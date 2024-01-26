@@ -125,7 +125,7 @@
 
   PPS_INPUT.value = state.pps;
   setPPS(state.pps);
-  document.addEventListener("mousedown", (e) => {
+  CANVAS.addEventListener("mousedown", (e) => {
     switch (e.button) {
       case 0:
         state = { ...state, pen_down: true };
@@ -136,7 +136,8 @@
     }
   });
   document.addEventListener("mouseleave", handleMouseUp);
-  document.addEventListener("mouseup", handleMouseUp);
+  CANVAS.addEventListener("mouseleave", handleMouseUp);
+  CANVAS.addEventListener("mouseup", handleMouseUp);
 
   function interpolateLine(x1, y1, x2, y2) {
     function interpolate(from, to, cnt) {
